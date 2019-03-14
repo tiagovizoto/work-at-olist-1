@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # My apps
     'apps.calls',
+    'apps.bills',
 ]
 
 MIDDLEWARE = [
