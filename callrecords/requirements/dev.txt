@@ -1,0 +1,5 @@
+-r production.txt
+django
+djangorestframework
+django-filter
+markdown
