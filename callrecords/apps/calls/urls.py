@@ -1,3 +1,6 @@
-# from django.urls import path
+from django.urls import path
+from .views import CallEndpoint
 
-# urlpatterns = []
+urlpatterns = [
+    path('', CallEndpoint.as_view()),
+]
