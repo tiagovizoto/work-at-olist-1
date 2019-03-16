@@ -1,0 +1,9 @@
+django-model-utils
+python-dateutil
+psycopg2
+dj-database-url
+psycopg2-binary
+django
+djangorestframework
+django-filter
+markdown
