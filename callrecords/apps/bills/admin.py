@@ -3,11 +3,11 @@ from .models import MinuteFee, FixedFee, Bill
 
 
 class MinuteFeeAdmin(admin.ModelAdmin):
-    list_display = ('price', 'start', 'end', 'time_total',)
+    list_display = ('price', 'start', 'end',)
 
 
 class FixedFeeAdmin(admin.ModelAdmin):
-    list_display = ('price', 'start', 'end', 'time_total',)
+    list_display = ('price', 'start', 'end',)
 
 
 class BillAdmin(admin.ModelAdmin):

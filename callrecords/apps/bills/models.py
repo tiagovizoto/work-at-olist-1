@@ -7,7 +7,6 @@ class Fee(TimeStampedModel, SoftDeletableModel):
     price = models.DecimalField(decimal_places=2, max_digits=12)
     start = models.TimeField()
     end = models.TimeField()
-    time_total = models.DurationField()
 
     class Meta:
         abstract = True
