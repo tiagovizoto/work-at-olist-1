@@ -22,7 +22,7 @@ class FixedFee(Fee):
 
 class Bill(TimeStampedModel, SoftDeletableModel):
     price = models.DecimalField(decimal_places=2, max_digits=12)
-    fixed_fee = models.ForeignKey(FixedFee, on_delete=models.CASCADE)
+    fixed_fee = models.ForeignKey(FixedFee, on_delete=models.CASCADE, null=True)
     call_start = models.ForeignKey(CallStart, on_delete=models.CASCADE)
     call_end = models.ForeignKey(CallEnd, on_delete=models.CASCADE)
 
