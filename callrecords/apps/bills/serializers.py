@@ -16,8 +16,8 @@ class MinuteFeeSerializer(serializers.ModelSerializer):
 
 
 class BillSerializer(serializers.ModelSerializer):
-    start_call = CallStartSerializer()
-    end_call = CallEndSerializer()
+    call_start = CallStartSerializer()
+    call_end = CallEndSerializer()
     fixed_fee = FixedFeeSerializer()
 
     class Meta:
