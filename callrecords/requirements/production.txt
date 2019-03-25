@@ -8,3 +8,4 @@ djangorestframework
 django-filter
 markdown
 gunicorn
+django_heroku
