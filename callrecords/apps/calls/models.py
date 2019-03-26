@@ -1,9 +1,10 @@
 from django.db import models
+from utils.models import BaseModel
 from django.core.exceptions import ValidationError
 from model_utils.models import TimeStampedModel, SoftDeletableModel
 
 
-class Call(TimeStampedModel, SoftDeletableModel):
+class Call(TimeStampedModel, SoftDeletableModel, BaseModel):
     id = models.IntegerField(primary_key=True)
     timestamp = models.DateTimeField()
 
