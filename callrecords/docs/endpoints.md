@@ -1,774 +1,378 @@
-## Endpoints
+# Endpoints
 
-__ /v1/call/ __
+*The examples use [HTTPie](https://httpie.org/) for api requests*
 
-- `POST /v1/call/`
+- [Fees](#fees)
+- [Calls Start and End](#calls)
+- [Last Bill](#last)
+- [Year and month bills](#month-and-year)
+- [Year Bills](#year)
 
-  _201_
 
-  `http POST http://127.0.0.1:8000/v1/call/ timestamp='2018-10-14T06:15:00Z' source=00999994545 destination=00999997878 type='start' call_id=84`
+____
+## Fees
+The endpoint fees accept several periods, but must not overlap.
 
-  Response:
-  ```
-  {
-    "call_id": 666,
-    "destination": "00999997878",
-    "source": "00999994545",
-    "timestamp": "2018-10-14T06:15:00Z"
-  }
-  ```
+#### Minute
+The charge applies to each completed 60 seconds cycle.
 
-  `http POST http://127.0.0.1:8000/v1/call/ timestamp='2018-10-14T10:21:00Z' type='end'  call_id=666`
+- ` POST /v1/bill/fee/minute/ `
+    
+> Example: `http POST http://127.0.0.1:8000/v1/bill/fee/minute/ price=0.09 start=06:00:00 end=22:00:00`
 
-  Response:
-  ```
-  {
-      "call_id": 666,
-      "destination": "00999997878",
-      "source": "00999994545",
-      "timestamp": "2018-10-14T06:15:00Z"
-  }
-  ```
+HTTP 201
+```
+{
+    "end": "22:00:00",
+    "id": 2,
+    "price": "0.09",
+    "start": "06:00:00"
+}
+```
 
-  _Examples 400_
+- ` GET /v1/bill/fee/minute/`
 
-  ```
-    {
-      "call_id": [
-          "call start with this call id already exists."
-      ]
-    }
+> Example: `http http://127.0.0.1:8000/v1/bill/fee/minute/`
 
-    [
-      "No exist the call_id 8595 in start call records"
+HTTP 200
+```
+List all minute fee
+```
+
+- ` GET /v1/bill/fee/minute/< id > `
+
+> Example: `http http://127.0.0.1:8000/v1/bill/fee/minute/2/`
+
+HTTP 200
+
+```
+{
+    "end": "22:00:00",
+    "id": 2,
+    "price": "0.09",
+    "start": "06:00:00"
+}
+```
+
+
+
+- ``` DELETE /v1/bill/fee/minute/< id > ```
+> Example: `http DELETE http://127.0.0.1:8000/v1/bill/fee/minute/2/`
+
+HTTP 204
+
+
+#### Fixed
+Fixed charges that are used to pay for the cost of the connection.
+
+- ``` POST /v1/bill/fee/fixed/ ```
+> Example: `http POST http://127.0.0.1:8000/v1/bill/fee/fixed/ price=0.99 start=00:00:00 end=23:00:00`
+
+HTTP 201
+```
+{
+    "end": "23:00:00",
+    "id": 2,
+    "price": "0.99",
+    "start": "00:00:00"
+}
+```
+
+
+- ``` GET /v1/bill/fee/fixed/< id > ```
+> Example: `http http://127.0.0.1:8000/v1/bill/fee/fixed/2/`
+
+HTTP 200
+```
+{
+    "end": "23:00:00",
+    "id": 2,
+    "price": "0.99",
+    "start": "00:00:00"
+}
+```
+
+- ` GET /v1/bill/fee/fixed/`
+
+> Example: `http http://127.0.0.1:8000/v1/bill/fee/fixed/`
+
+HTTP 200
+```
+List all fixed fee
+```
+
+
+- ``` DELETE /v1/bill/fee/fixed/< id > ```
+> Example: `http DELETE http://127.0.0.1:8000/v1/bill/fee/fixed/2/`
+
+HTTP 204
+
+____
+## Calls
+
+#### Start
+Creates a start of call records
+
+- ` POST /v1/call/ `
+> Example: `http POST http://127.0.0.1:8000/v1/call/ timestamp='2016-02-29T12:00:00Z' source:=99988526423 destination:=99997858585 type='start' id:=1`
+
+HTTP 201
+```
+{
+    "destination": 9933468278,
+    "id": 1,
+    "source": 99988526423,
+    "timestamp": "2016-02-29T12:00:00Z"
+}
+
+```
+
+#### End
+Finishes the call
+
+- ```POST /v1/call/ ```
+> Example: `http POST http://127.0.0.1:8000/v1/call/ timestamp='2016-02-29T14:00:00Z' type='end'  id:=1`
+
+HTTP 201
+```
+{
+    "id": 1,
+    "timestamp": "2016-02-29T14:00:00Z"
+}
+```
+___
+## Bills
+
+#### Last 
+Gets the last bill
+
+- ```GET /v1/bill/< number phone >/ ```
+> Example: `http http://127.0.0.1:8000/v1/bill/99888888888/`
+
+HTTP 200
+```
+{
+    "calls_count": 2,
+    "price": 34.26,
+    "records": [
+        [
+            {
+                "call_end": {
+                    "id": 91,
+                    "timestamp": "2019-02-10T22:10:56Z"
+                },
+                "call_start": {
+                    "destination": 9933468278,
+                    "id": 91,
+                    "source": 99888888888,
+                    "timestamp": "2019-02-10T21:57:13Z"
+                },
+                "duration": "0d0h13m43s",
+                "fixed_fee": {
+                    "end": "23:59:59",
+                    "id": 1,
+                    "price": "0.39",
+                    "start": "00:00:00"
+                },
+                "id": 18,
+                "price": "0.57"
+            },
+            {
+                "call_end": {
+                    "id": 92,
+                    "timestamp": "2019-02-10T12:10:56Z"
+                },
+                "call_start": {
+                    "destination": 9933468278,
+                    "id": 92,
+                    "source": 99888888888,
+                    "timestamp": "2019-02-10T05:57:13Z"
+                },
+                "duration": "0d6h13m43s",
+                "fixed_fee": {
+                    "end": "23:59:59",
+                    "id": 1,
+                    "price": "0.39",
+                    "start": "00:00:00"
+                },
+                "id": 19,
+                "price": "33.69"
+            }
+        ]
     ]
+}
 
-  ```
-__ /v1/bill/fee/minute/ __
+```
 
-- `GET /v1/bill/fee/minute/`
+#### Month and Year
+Gets the bill by year and month informed
 
-  _200_
-  ```
-  HTTP 200 OK
-  Allow: GET, POST, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
+- ```GET /v1/bill/< number phone >/< year >/< month >/ ```
+> Example: `http http://127.0.0.1:8000/v1/bill/99888888888/2018/03/`
 
-  [
-      {
-          "id": 39,
-          "price": "0.09",
-          "start": "06:00:00",
-          "end": "22:00:00"
-      },
-      {
-          "id": 40,
-          "price": "0.01",
-          "start": "22:30:00",
-          "end": "23:00:00"
-      }
-  ]
-  ```
+HTTP 200
+```
+{
+    "calls_count": 1,
+    "price": 86.97,
+    "records": [
+        [
+            {
+                "call_end": {
+                    "id": 87,
+                    "timestamp": "2018-03-01T22:10:56Z"
+                },
+                "call_start": {
+                    "destination": 9933468278,
+                    "id": 87,
+                    "source": 99888888888,
+                    "timestamp": "2018-02-28T21:57:13Z"
+                },
+                "duration": "1d0h13m43s",
+                "fixed_fee": {
+                    "end": "23:59:59",
+                    "id": 1,
+                    "price": "0.39",
+                    "start": "00:00:00"
+                },
+                "id": 16,
+                "price": "86.97"
+            }
+        ]
+    ]
+}
 
-- `POST /v1/bill/fee/minute/`
+```
 
-  _201_
-  ```
-  http POST http://127.0.0.1:8000/v1/bill/fee/minute/ price=0.01 start=01:00:00 end=12:00:00
+#### Year
+Gets the all bills of year informed
 
-  HTTP/1.1 201 Created
-  Allow: GET, POST, HEAD, OPTIONS
-  Content-Length: 60
-  Content-Type: application/json
-  Date: Mon, 25 Feb 2019 18:37:46 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
+- ```GET /v1/bill/< number phone >/< year >/ ```
+> Example: `http http://127.0.0.1:8000/v1/bill/99888888888/2018/`
 
-  {
-      "end": "12:00:00",
-      "id": 41,
-      "price": "0.01",
-      "start": "01:00:00"
-  }
-
-  ```
-
-- `GET /v1/bill/fee/minute/<id>/`
-
-  _200_
-  ```
-  HTTP 200 OK
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "id": 39,
-      "price": "0.09",
-      "start": "06:00:00",
-      "end": "22:00:00"
-  }
-  ```
-
-  _404_
-  ```
-  HTTP 404 Not Found
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "detail": "Not found."
-  }
-  ```
-
-- `DELETE /v1/bill/fee/minute/<id>/`
-
-  _204_
-  ```
-  HTTP/1.1 204 No Content
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Length: 0
-  Date: Mon, 25 Feb 2019 10:31:28 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-  ```
-  _400 (301)_
-  ```
-  HTTP/1.1 301 Moved Permanently
-  Content-Length: 0
-  Content-Type: text/html; charset=utf-8
-  Date: Mon, 25 Feb 2019 10:30:54 GMT
-  Location: /v1/bill/fee/minute/39/
-  ```
-
-
-__ /v1/bill/fee/fixed/ __
-
-- `GET /v1/bill/fee/fixed/`
-
-  _200_
-  ```
-  HTTP 200 OK
-  Allow: GET, POST, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  [
-      {
-          "id": 1,
-          "price": "0.36",
-          "start": "00:00:00",
-          "end": "23:59:00"
-      }
-  ]
-  ```
-
-- `POST /v1/bill/fee/fixed/`
-
-  _201_
-  ```
-  http POST http://127.0.0.1:8000/v1/bill/fee/fixed/ price=0.39 start=00:00:00 end=23:59:59
-
-  HTTP/1.1 201 Created
-  Allow: GET, POST, HEAD, OPTIONS
-  Content-Length: 59
-  Content-Type: application/json
-  Date: Mon, 25 Feb 2019 18:42:12 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-
-  {
-      "end": "23:59:59",
-      "id": 2,
-      "price": "0.39",
-      "start": "00:00:00"
-  }
-
-  ```
-  _400_
-  ```
-  HTTP/1.1 400 Bad Request
-  Allow: GET, POST, HEAD, OPTIONS
-  Content-Length: 28
-  Content-Type: application/json
-  Date: Mon, 25 Feb 2019 18:41:52 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-
-  [
-      "Exist conflicts of times"
-  ]
-  ```
-
-- `GET /v1/bill/fee/fixed/<id>/`
-
-  _200_
-  ```
-  HTTP 200 OK
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "id": 1,
-      "price": "0.36",
-      "start": "00:00:00",
-      "end": "23:59:00"
-  }
-  ```
-  _404_
-  ```
-  HTTP 404 Not Found
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "detail": "Not found."
-  }
-  ```
-
-- `DELETE /v1/bill/fee/fixed/<id>/`
-
-  _204_
-  ```
-  HTTP/1.1 204 No Content
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Length: 0
-  Date: Mon, 25 Feb 2019 10:31:28 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-  ```
-  _400 (301)_
-  ```
-  HTTP/1.1 301 Moved Permanently
-  Content-Length: 0
-  Content-Type: text/html; charset=utf-8
-  Date: Mon, 25 Feb 2019 10:30:54 GMT
-  Location: /v1/bill/fee/minute/39/
-
-  ```
+HTTP 200
+```
+[
+    {
+        "count_records": 0,
+        "month": 1,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 2,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 1,
+        "month": 3,
+        "price": 86.97,
+        "records": [
+            [
+                {
+                    "call_end": {
+                        "id": 87,
+                        "timestamp": "2018-03-01T22:10:56Z"
+                    },
+                    "call_start": {
+                        "destination": 9933468278,
+                        "id": 87,
+                        "source": 99888888888,
+                        "timestamp": "2018-02-28T21:57:13Z"
+                    },
+                    "duration": "1d0h13m43s",
+                    "fixed_fee": {
+                        "end": "23:59:59",
+                        "id": 1,
+                        "price": "0.39",
+                        "start": "00:00:00"
+                    },
+                    "id": 16,
+                    "price": "86.97"
+                }
+            ]
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 4,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 5,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 6,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 7,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 8,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 9,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 10,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 11,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    },
+    {
+        "count_records": 0,
+        "month": 12,
+        "price": 0.0,
+        "records": [
+            []
+        ]
+    }
+]
 
 
-__ /v1/bill/ __
-
-- `GET /v1/bill/<number phone>/`
-
-  _200_
-  ```
-  HTTP/1.1 200 OK
-  Allow: GET, HEAD, OPTIONS
-  Content-Length: 697
-  Content-Type: application/json
-  Date: Mon, 25 Feb 2019 10:38:59 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-
-  {
-      "calls_count": 2,
-      "price": 67.14,
-      "records": [
-          [
-              {
-                  "duration": "00:00:00",
-                  "end_call": {
-                      "call_id": 100,
-                      "timestamp": "2019-01-14T10:21:00Z"
-                  },
-                  "fixed_fee": {
-                      "end": "23:59:00",
-                      "id": 1,
-                      "price": "0.36",
-                      "start": "00:00:00"
-                  },
-                  "id": 7,
-                  "price": "22.50",
-                  "start_call": {
-                      "call_id": 100,
-                      "destination": "41992782762",
-                      "source": "4197020434",
-                      "timestamp": "2019-01-14T06:15:00Z"
-                  }
-              },
-              {
-                  "duration": "00:00:00",
-                  "end_call": {
-                      "call_id": 101,
-                      "timestamp": "2019-01-20T10:21:00Z"
-                  },
-                  "fixed_fee": {
-                      "end": "23:59:00",
-                      "id": 1,
-                      "price": "0.36",
-                      "start": "00:00:00"
-                  },
-                  "id": 8,
-                  "price": "44.64",
-                  "start_call": {
-                      "call_id": 101,
-                      "destination": "41992782762",
-                      "source": "4197020434",
-                      "timestamp": "2019-01-20T06:15:00Z"
-                  }
-              }
-          ]
-      ]
-  }
-
-  ```
-  _404_
-  ```
-  HTTP 404 Not Found
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "detail": "Not found."
-  }
-  ```
-
-- `GET /v1/bill/<number phone>/<year>/`
-
-  _200_
-  ```
-  HTTP/1.1 200 OK
-  Allow: GET, HEAD, OPTIONS
-  Content-Length: 4036
-  Content-Type: application/json
-  Date: Mon, 25 Feb 2019 10:37:37 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-
-  [
-      {
-          "count_records": 0,
-          "month": 1,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 2,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 3,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 4,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 5,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 6,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 7,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 8,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 0,
-          "month": 9,
-          "price": 0.0,
-          "records": [
-              []
-          ]
-      },
-      {
-          "count_records": 7,
-          "month": 10,
-          "price": 466.02,
-          "records": [
-              [
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 33,
-                          "timestamp": "2018-10-14T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 1,
-                      "price": "22.14",
-                      "start_call": {
-                          "call_id": 33,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-14T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 30,
-                          "timestamp": "2018-10-14T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 2,
-                      "price": "22.14",
-                      "start_call": {
-                          "call_id": 30,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-14T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 85,
-                          "timestamp": "2018-10-14T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 3,
-                      "price": "22.14",
-                      "start_call": {
-                          "call_id": 85,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-14T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 84,
-                          "timestamp": "2018-10-14T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 4,
-                      "price": "22.50",
-                      "start_call": {
-                          "call_id": 84,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-14T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 81,
-                          "timestamp": "2018-10-14T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 5,
-                      "price": "22.14",
-                      "start_call": {
-                          "call_id": 81,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-14T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 106,
-                          "timestamp": "2018-10-30T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 13,
-                      "price": "155.34",
-                      "start_call": {
-                          "call_id": 106,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-30T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 108,
-                          "timestamp": "2018-10-17T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 15,
-                      "price": "199.62",
-                      "start_call": {
-                          "call_id": 108,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-10-17T06:15:00Z"
-                      }
-                  }
-              ]
-          ]
-      },
-      {
-          "count_records": 1,
-          "month": 11,
-          "price": 687.78,
-          "records": [
-              [
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 109,
-                          "timestamp": "2018-11-01T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 16,
-                      "price": "221.76",
-                      "start_call": {
-                          "call_id": 109,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-11-01T06:15:00Z"
-                      }
-                  }
-              ]
-          ]
-      },
-      {
-          "count_records": 2,
-          "month": 12,
-          "price": 909.8999999999999,
-          "records": [
-              [
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 103,
-                          "timestamp": "2018-12-14T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 10,
-                      "price": "88.92",
-                      "start_call": {
-                          "call_id": 103,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-12-14T06:15:00Z"
-                      }
-                  },
-                  {
-                      "duration": "00:00:00",
-                      "end_call": {
-                          "call_id": 105,
-                          "timestamp": "2018-12-18T10:21:00Z"
-                      },
-                      "fixed_fee": {
-                          "end": "23:59:00",
-                          "id": 1,
-                          "price": "0.36",
-                          "start": "00:00:00"
-                      },
-                      "id": 12,
-                      "price": "133.20",
-                      "start_call": {
-                          "call_id": 105,
-                          "destination": "41992782762",
-                          "source": "4197020434",
-                          "timestamp": "2018-12-18T06:15:00Z"
-                      }
-                  }
-              ]
-          ]
-      }
-  ]
-
-  ```
-  _404_
-  ```
-  HTTP 404 Not Found
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "detail": "Not found."
-  }
-  ```
-
-- `GET /v1/bill/<number phone>/<year>/<month>/`
-
-  _200_
-  ```
-  HTTP/1.1 200 OK
-  Allow: GET, HEAD, OPTIONS
-  Content-Length: 2312
-  Content-Type: application/json
-  Date: Mon, 25 Feb 2019 10:34:55 GMT
-  Server: WSGIServer/0.2 CPython/3.7.2
-  Vary: Accept, Cookie
-  X-Frame-Options: SAMEORIGIN
-
-  {
-      "calls_count": 3,
-      "price": 466.02,
-      "records": [
-          [
-              {
-                  "duration": "00:00:00",
-                  "end_call": {
-                      "call_id": 30,
-                      "timestamp": "2018-10-14T10:21:00Z"
-                  },
-                  "fixed_fee": {
-                      "end": "23:59:00",
-                      "id": 1,
-                      "price": "0.36",
-                      "start": "00:00:00"
-                  },
-                  "id": 2,
-                  "price": "22.14",
-                  "start_call": {
-                      "call_id": 30,
-                      "destination": "41992782762",
-                      "source": "4197020434",
-                      "timestamp": "2018-10-14T06:15:00Z"
-                  }
-              },
-              {
-                  "duration": "00:00:00",
-                  "end_call": {
-                      "call_id": 85,
-                      "timestamp": "2018-10-14T10:21:00Z"
-                  },
-                  "fixed_fee": {
-                      "end": "23:59:00",
-                      "id": 1,
-                      "price": "0.36",
-                      "start": "00:00:00"
-                  },
-                  "id": 3,
-                  "price": "22.14",
-                  "start_call": {
-                      "call_id": 85,
-                      "destination": "41992782762",
-                      "source": "4197020434",
-                      "timestamp": "2018-10-14T06:15:00Z"
-                  }
-              },
-              {
-                  "duration": "00:00:00",
-                  "end_call": {
-                      "call_id": 81,
-                      "timestamp": "2018-10-14T10:21:00Z"
-                  },
-                  "fixed_fee": {
-                      "end": "23:59:00",
-                      "id": 1,
-                      "price": "0.36",
-                      "start": "00:00:00"
-                  },
-                  "id": 5,
-                  "price": "22.14",
-                  "start_call": {
-                      "call_id": 81,
-                      "destination": "41992782762",
-                      "source": "4197020434",
-                      "timestamp": "2018-10-14T06:15:00Z"
-                  }
-              }
-          ]
-      ]
-  }
-  ```
-  _404_
-  ```
-  HTTP 404 Not Found
-  Allow: GET, DELETE, HEAD, OPTIONS
-  Content-Type: application/json
-  Vary: Accept
-
-  {
-      "detail": "Not found."
-  }
-  ```
-
-
+```
+____

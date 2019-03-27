@@ -77,22 +77,29 @@ $ cd work-at-olist/callrecords
 $ pip install -r requirements/test.txt
 ```
 
-##### 4 - Run Tests \o/
+#### 4 - Migrate Database
+```
+python manage.py migrate
+```
+#### 5 - Local variable
+
+> [examples format url databases](https://github.com/kennethreitz/dj-database-url)
+ 
+```
+export DATABASE_URL=postgres://$USER@$HOST/$DB
+```
+
+#### 6 - Run Tests \o/
 ```
 pytest
 ```
 
-##### 5 - Migrate Database
-```
-python manage.py migrate
-```
-
-##### 6 - Create a superuser
+#### 7 - Create a superuser
 ```
 python manage.py createsuperuser
 ```
 
-#### 7 - Run project
+#### 8 - Run project
 ```
 python manage.py runserver
 ```
