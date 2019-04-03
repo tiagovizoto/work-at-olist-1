@@ -39,17 +39,22 @@ class CallEndpoint(APIView):
                 start = parse(str(result.first().timestamp.replace(tzinfo=None)))
                 end = parse(serializer.data['timestamp']).replace(tzinfo=None)
 
-                fixed_fee = search_fixed_fee(str(result.first().timestamp.time())) if not None else 0
+                fixed_fee = search_fixed_fee(str(result.first().timestamp.time()))
+
+                if fixed_fee is None:
+                    price_fixed_fee = Decimal()
+                else:
+                    price_fixed_fee = fixed_fee.price
 
                 if start.date() == end.date():
                     price = one_day(start, end)
-                    bill = Bill.objects.create(price=price['price'] + fixed_fee.price, fixed_fee=fixed_fee, call_start=result.first(), call_end=end_date)
+                    bill = Bill.objects.create(price=price['price'] + price_fixed_fee, fixed_fee=fixed_fee, call_start=result.first(), call_end=end_date)
                 elif (start.date() + timedelta(days=1)) != end.date():
-                    price = two_days(start, end)
-                    bill = Bill.objects.create(price=price['price'] + fixed_fee.price, fixed_fee=fixed_fee, call_start=result.first(), call_end=end_date)
-                else:
                     price = several_days(start, end)
-                    bill = Bill.objects.create(price=price['price'] + fixed_fee.price, fixed_fee=fixed_fee, call_start=result.first(), call_end=end_date)
+                    bill = Bill.objects.create(price=price['price'] + price_fixed_fee, fixed_fee=fixed_fee, call_start=result.first(), call_end=end_date)
+                else:
+                    price = two_days(start, end)
+                    bill = Bill.objects.create(price=price['price'] + price_fixed_fee, fixed_fee=fixed_fee, call_start=result.first(), call_end=end_date)
 
                 for p in price['periods']:
                     MinuteFeeBill.objects.create(minute_fee=p, bill=bill)
@@ -242,7 +247,7 @@ def search_periods_in_time(start, end):
 def search_fixed_fee(s_time):
     # result = FixedFee.objects.filter(start__gte=time, end__lte=time)
     # Search for a period that contains a certain time..
-    result = FixedFee.objects.raw("select * from bills_fixedfee where %s >= start and %s <= bills_fixedfee.end", [s_time, s_time])
+    result = FixedFee.objects.raw("select * from bills_fixedfee where %s >= start and %s <= bills_fixedfee.end and is_removed = 'f'", [s_time, s_time])
     try:
         r = result[0]
     except IndexError:
